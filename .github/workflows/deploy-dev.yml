@@ -14,7 +14,7 @@ jobs:
         run: |
           APP_YAML_B64=$(base64 -w0 < app.yaml)
           curl -sf -X POST \
-            -H "Authorization: token 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" \
+            -H "Authorization: token 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" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/easydeploytest/EasyDeploy/dispatches" \
             -d "{\"event_type\":\"app-deploy\",\"client_payload\":{\"sha\":\"$GITHUB_SHA\",\"repo_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY\",\"app_yaml_b64\":\"$APP_YAML_B64\"}}"

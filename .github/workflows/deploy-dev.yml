@@ -4,33 +4,18 @@ on:
   push:
     branches: [main]
 
-env:
-  REGISTRY: "registry.easy-deploy.135.181.177.246.nip.io"
-
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PyYAML
-        run: pip install pyyaml --quiet
-
-      - name: Build and push image
+      - name: Dispatch to EasyDeploy platform
         run: |
-          APP=$(python3 -c "import yaml; print(yaml.safe_load(open('app.yaml'))['name'])")
-          docker login $REGISTRY -u easydeploy -p EasyDeploy2024
-          docker buildx build --push \
-            -t $REGISTRY/easy-deploy/$APP:$GITHUB_SHA \
-            -t $REGISTRY/easy-deploy/$APP:latest \
-            .
-
-      - name: Trigger platform deployment
-        run: |
-          APP_YAML_B64=$(base64 < app.yaml | tr -d '\n')
-          gh api repos/easydeploytest/EasyDeploy/dispatches \
-            -X POST \
-            -f event_type=app-deploy \
-            -f "client_payload[sha]=$GITHUB_SHA" \
-            -f "client_payload[repo_url]=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-            -f "client_payload[app_yaml_b64]=$APP_YAML_B64"
+          APP_YAML_B64=$(base64 -w0 < app.yaml)
+          curl -sf -X POST \
+            -H "Authorization: token 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" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/easydeploytest/EasyDeploy/dispatches" \
+            -d "{\"event_type\":\"app-deploy\",\"client_payload\":{\"sha\":\"$GITHUB_SHA\",\"repo_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY\",\"app_yaml_b64\":\"$APP_YAML_B64\"}}"
+          echo "Dispatched to EasyDeploy platform"

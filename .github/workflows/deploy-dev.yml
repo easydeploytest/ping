@@ -27,8 +27,7 @@ jobs:
 
       - name: Trigger platform deployment
         run: |
-          APP_YAML_B64=$(base64 < app.yaml | tr -d '
-')
+          APP_YAML_B64=$(base64 < app.yaml | tr -d '\n')
           gh api repos/easydeploytest/EasyDeploy/dispatches \
             -X POST \
             -f event_type=app-deploy \
